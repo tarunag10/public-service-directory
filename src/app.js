@@ -4,6 +4,7 @@ import {
   buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
+  currentGuidance,
   findEscalationRoutes,
   loadSavedActionPlans,
   saveActionPlan,
@@ -15,6 +16,7 @@ const sectorSelect = document.querySelector('#sector');
 const results = document.querySelector('#results');
 const reset = document.querySelector('#reset');
 const savedPlans = document.querySelector('#saved-plans');
+const currentGuidanceMount = document.querySelector('#current-guidance');
 
 let currentPlan = null;
 
@@ -38,6 +40,7 @@ function renderActionPlan(plan) {
       <ul>${renderEvidence(plan.evidenceToGather)}</ul>
     </div>
     <p><strong>Escalation path:</strong> ${plan.escalationPath}</p>
+    ${plan.currentNote ? `<p><strong>Current note:</strong> ${plan.currentNote}</p>` : ''}
     <a class="button" href="${plan.officialUrl}" rel="noreferrer">Open official route</a>
     <button id="save-plan" type="button" class="secondary">Save plan locally</button>
     <div class="checklist-tools">
@@ -62,6 +65,7 @@ function renderRoute(route) {
     <h2>${route.name}</h2>
     <p><strong>First step:</strong> ${route.firstStep}</p>
     <p><strong>Next:</strong> ${route.nextStep}</p>
+    ${route.currentNote ? `<p><strong>Current note:</strong> ${route.currentNote}</p>` : ''}
     <div>
       <strong>Evidence to keep</strong>
       <ul>${renderEvidence(route.evidence)}</ul>
@@ -69,6 +73,14 @@ function renderRoute(route) {
     <p class="keywords"><strong>Keywords:</strong> ${route.keywords.join(', ')}</p>
     <a class="button secondary" href="${route.officialUrl}" rel="noreferrer">Official route</a>
   </article>`;
+}
+
+function renderCurrentGuidance() {
+  currentGuidanceMount.innerHTML = currentGuidance.map((item) => `<article class="card">
+    <h3>${item.title}</h3>
+    <p>${item.detail}</p>
+    <a href="${item.url}" rel="noreferrer">${item.source}</a>
+  </article>`).join('');
 }
 
 function renderSavedPlans() {
@@ -154,3 +166,4 @@ input.addEventListener('input', update);
 sectorSelect.addEventListener('change', update);
 update();
 renderSavedPlans();
+renderCurrentGuidance();

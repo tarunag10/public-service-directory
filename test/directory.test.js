@@ -6,6 +6,7 @@ import {
   buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
+  currentGuidance,
   findEscalationRoutes,
   loadSavedActionPlans,
   routes,
@@ -48,6 +49,7 @@ test('builds an action plan from the strongest query match', () => {
   assert.match(plan.firstStep, /Complain to the firm first/);
   assert.ok(plan.evidenceToGather.includes('final response letter'));
   assert.match(plan.escalationPath, /ombudsman/i);
+  assert.match(plan.currentNote, /8 weeks/);
   assert.equal(plan.officialUrl, 'https://www.financial-ombudsman.org.uk/');
 });
 
@@ -115,6 +117,7 @@ test('builds printable escalation checklist text for an action plan', () => {
   assert.match(checklist, /First step: Contact the train company first/);
   assert.match(checklist, /\[ \] ticket or booking reference/);
   assert.match(checklist, /Escalation path: Escalate when the operator/);
+  assert.match(checklist, /40 working days/);
   assert.match(checklist, /Official route: https:\/\/www\.railombudsman\.org\//);
 });
 
@@ -146,5 +149,13 @@ test('builds escalation handoff packs with report, checklist, and contact log', 
   assert.match(pack.markdown, /## Checklist/);
   assert.match(pack.markdown, /## Contact log/);
   assert.match(pack.markdown, /Reference number/);
+  assert.match(pack.markdown, /Current source notes/);
   assert.match(pack.markdown, /Nothing was sent to a server/);
+});
+
+test('exposes current escalation guidance sources', () => {
+  assert.equal(currentGuidance.length, 4);
+  assert.ok(currentGuidance.some((item) => item.detail.includes('8 weeks')));
+  assert.ok(currentGuidance.some((item) => item.detail.includes('12 months')));
+  assert.ok(currentGuidance.every((item) => item.url.startsWith('https://')));
 });

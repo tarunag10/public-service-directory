@@ -25,6 +25,7 @@ export const routes = [
     evidence: ['final response letter', 'statements', 'policy documents', 'screenshots', 'loss calculation'],
     officialUrl: 'https://www.financial-ombudsman.org.uk/',
     nextStep: 'Raise the case with the ombudsman within the published deadline after the final response.',
+    currentNote: 'The Financial Ombudsman says most financial firms should reply within 8 weeks, and the final response normally explains the 6-month referral window.',
   },
   {
     name: 'Rail Ombudsman',
@@ -34,6 +35,7 @@ export const routes = [
     evidence: ['ticket or booking reference', 'delay details', 'accessibility booking', 'operator response'],
     officialUrl: 'https://www.railombudsman.org/',
     nextStep: 'Escalate when the operator is deadlocked or has not resolved the complaint.',
+    currentNote: 'The Rail Ombudsman says to come to it after a deadlock/final response or when the provider has not resolved the complaint within 40 working days.',
   },
   {
     name: 'Ofgem energy complaints',
@@ -79,6 +81,7 @@ export const routes = [
     evidence: ['completion of procedures letter', 'student handbook', 'emails', 'assessment records', 'timeline'],
     officialUrl: 'https://www.oiahe.org.uk/students/how-to-complain-to-us/',
     nextStep: 'Take eligible complaints to the Office of the Independent Adjudicator within its deadline.',
+    currentNote: 'The OIA states students have a maximum of 12 months from the Completion of Procedures Letter date to bring a complaint.',
   },
   {
     name: 'Housing Ombudsman',
@@ -88,6 +91,7 @@ export const routes = [
     evidence: ['repair logs', 'photos', 'medical impact notes', 'landlord responses', 'rent account'],
     officialUrl: 'https://www.housing-ombudsman.org.uk/residents/make-a-complaint/',
     nextStep: 'Escalate after the landlord final response or when the complaint is delayed beyond the scheme rules.',
+    currentNote: 'The Housing Ombudsman says social landlords should acknowledge stage 1 and stage 2 complaints within 5 working days, respond at stage 1 within 10 working days, and respond at stage 2 within 20 working days.',
   },
   {
     name: 'Consumer complaints',
@@ -98,6 +102,33 @@ export const routes = [
     officialUrl: 'https://www.citizensadvice.org.uk/consumer/get-more-help/if-you-need-more-help-about-a-consumer-issue/',
     nextStep: 'Citizens Advice can explain consumer rights and pass suitable cases to Trading Standards.',
   },
+];
+
+export const currentGuidance = [
+  {
+    title: 'Council complaints usually start locally',
+    detail: 'GOV.UK says to complain to the council service provider, then the council complaints officer, before going to the Local Government and Social Care Ombudsman where appropriate.',
+    source: 'GOV.UK council complaints',
+    url: 'https://www.gov.uk/understand-how-your-council-works/make-a-complaint'
+  },
+  {
+    title: 'Financial complaints have an 8-week marker',
+    detail: 'The Financial Ombudsman says firms should respond within 8 weeks at most for many complaints, and final responses normally explain the 6-month referral window.',
+    source: 'Financial Ombudsman complaint checker',
+    url: 'https://www.financial-ombudsman.org.uk/consumers/how-to-complain/complaint-checker'
+  },
+  {
+    title: 'Student complaints have a 12-month OIA limit',
+    detail: 'The OIA says students normally have a maximum of 12 months from the date of the Completion of Procedures Letter to bring a complaint.',
+    source: 'OIA time limits',
+    url: 'https://www.oiahe.org.uk/about-us/our-scheme/our-rules/guidance-on-the-rules/rule-8/'
+  },
+  {
+    title: 'Rail complaints use 40 working days or deadlock',
+    detail: 'The Rail Ombudsman says passengers can complain after a final response/deadlock letter or if the provider has not resolved the complaint within 40 working days.',
+    source: 'Rail Ombudsman FAQ',
+    url: 'https://www.railombudsman.org/faq'
+  }
 ];
 
 const normalize = (value) => value.toLowerCase().trim();
@@ -173,6 +204,7 @@ export function buildActionPlan(query = '', options = {}) {
     evidenceToGather: route.evidence,
     escalationPath: route.nextStep,
     officialUrl: route.officialUrl,
+    currentNote: route.currentNote || '',
   };
 }
 
@@ -199,6 +231,7 @@ function normalizeSavedPlan(plan) {
     evidenceToGather,
     escalationPath: String(plan.escalationPath || ''),
     officialUrl: String(plan.officialUrl || ''),
+    currentNote: String(plan.currentNote || ''),
   };
 }
 
@@ -257,8 +290,9 @@ export function buildEscalationChecklist(plan) {
     ...evidence.map((item) => `[ ] ${item}`),
     '',
     `Escalation path: ${plan.escalationPath}`,
+    plan.currentNote ? `Current note: ${plan.currentNote}` : '',
     `Official route: ${plan.officialUrl}`,
-  ].join('\n');
+  ].filter((line) => line !== '').join('\n');
 }
 
 function classifyEvidenceItem(item) {
@@ -294,6 +328,7 @@ export function buildEscalationReadinessReport(plan, options = {}) {
       ? `Prioritise: ${missingEvidence.slice(0, 3).join(', ')}.`
       : 'Keep a copy of the complete evidence pack before escalating.',
     plan.escalationPath,
+    plan.currentNote,
     `Use the official route: ${plan.officialUrl}`,
   ].filter(Boolean);
 
@@ -352,6 +387,9 @@ export function buildEscalationHandoffPack(plan, options = {}) {
       '- [ ] Reference number:',
       '- [ ] Response promised by:',
       '- [ ] Follow-up needed:',
+      '',
+      '## Current source notes',
+      ...currentGuidance.map((item) => `- ${item.title}: ${item.detail} Source: ${item.url}`),
       '',
       'Check official deadlines, scheme rules, and urgent advice routes before submitting.'
     ].join('\n')
