@@ -12,7 +12,38 @@
     <nav aria-label="Primary"><a href="#tool">Tool</a><a href="#guidance">Guidance</a><a href="#contribute">Contribute</a></nav>
   </header>
   <main>
-    <section class="hero"><div><h1>Complaint Escalation Map</h1><p>Find where UK public-service and consumer complaints can go next after the first complaint route has been tried.</p></div></section><section id="tool" class="grid"><div class="panel"><label for="query">Issue, evidence, or keyword</label><input id="query" value="council housing repair" aria-controls="results"><label for="sector">Sector</label><select id="sector" aria-controls="results"></select><button id="reset" type="button">Clear filters</button><div id="saved-plans" class="saved-list" aria-live="polite"></div></div><div id="results" class="cards" aria-live="polite"></div></section><section id="guidance" class="footer-band"><h2>Before escalating</h2><p>Most ombudsman routes expect you to complete the organisation's own complaint process first. Keep a short timeline, the final response or deadlock letter where available, and copies of evidence before using the official route.</p></section>
+    <section class="hero">
+      <div>
+        <h1>Complaint Escalation Map</h1>
+        <p>Find where UK public-service and consumer complaints can go next after the first complaint route has been tried.</p>
+        <div class="hero-actions">
+          <a class="button" href="#tool">Build an action plan</a>
+          <a class="button secondary" href="https://github.com/tarunag10/public-service-directory">View GitHub</a>
+        </div>
+      </div>
+      <div class="product-panel" aria-label="Escalation map product preview">
+        <div class="mini-window">
+          <span>Council housing repair</span>
+          <strong>Council complaint → Housing Ombudsman</strong>
+          <i></i><i></i><i></i>
+          <b>Readiness report ready</b>
+        </div>
+      </div>
+    </section>
+    <section class="gtm-strip" aria-label="Escalation directory feature highlights">
+      <article><span>01</span><h2>Find the route</h2><p>Search by issue, sector, evidence type, or everyday complaint wording.</p></article>
+      <article><span>02</span><h2>Prepare evidence</h2><p>Turn the selected route into a checklist of records, decisions, and impact notes.</p></article>
+      <article><span>03</span><h2>Escalate clearly</h2><p>Copy or print a readiness report with blockers, next actions, and official links.</p></article>
+    </section>
+    <section class="use-cases" aria-label="Escalation use cases">
+      <h2>Useful before an ombudsman, regulator, or advice appointment.</h2>
+      <div class="cards">
+        <article class="card"><h3>Public services</h3><p>Map routes for councils, housing, care, education, and data protection problems.</p></article>
+        <article class="card"><h3>Regulated services</h3><p>Prepare complaints for finance, rail, energy, broadband, mobile, and consumer routes.</p></article>
+        <article class="card"><h3>Local records</h3><p>Save plans in browser storage and clear them whenever you choose.</p></article>
+      </div>
+    </section>
+    <section id="tool" class="grid"><div class="panel"><label for="query">Issue, evidence, or keyword</label><input id="query" value="council housing repair" aria-controls="results"><label for="sector">Sector</label><select id="sector" aria-controls="results"></select><button id="reset" type="button">Clear filters</button><div id="saved-plans" class="saved-list" aria-live="polite"></div></div><div id="results" class="cards" aria-live="polite"></div></section><section id="guidance" class="footer-band"><h2>Before escalating</h2><p>Most ombudsman routes expect you to complete the organisation's own complaint process first. Keep a short timeline, the final response or deadlock letter where available, and copies of evidence before using the official route.</p></section>
   </main>
   <script type="module" src="src/app.js"></script>
 </body>
