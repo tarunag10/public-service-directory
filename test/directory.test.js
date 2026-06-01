@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationReadinessReport,
   clearSavedActionPlans,
   findEscalationRoutes,
   loadSavedActionPlans,
@@ -114,4 +115,23 @@ test('builds printable escalation checklist text for an action plan', () => {
   assert.match(checklist, /\[ \] ticket or booking reference/);
   assert.match(checklist, /Escalation path: Escalate when the operator/);
   assert.match(checklist, /Official route: https:\/\/www\.railombudsman\.org\//);
+});
+
+test('builds escalation readiness report markdown with grouped evidence and blockers', () => {
+  const plan = buildActionPlan('bank fraud refund');
+  const report = buildEscalationReadinessReport(plan, {
+    missingEvidence: ['final response letter', 'loss calculation'],
+  });
+
+  assert.equal(report.routeName, 'Financial Ombudsman Service');
+  assert.equal(report.readinessScore, 60);
+  assert.equal(report.status, 'nearly-ready');
+  assert.deepEqual(report.missingEvidence, ['final response letter', 'loss calculation']);
+  assert.ok(report.evidenceGroups.decision.includes('final response letter'));
+  assert.ok(report.evidenceGroups.evidence.includes('statements'));
+  assert.ok(report.blockers.some((blocker) => blocker.includes('2 remaining evidence')));
+  assert.match(report.markdown, /^# Financial Ombudsman Service readiness report/m);
+  assert.match(report.markdown, /- \[ \] final response letter/);
+  assert.match(report.markdown, /- \[x\] statements/);
+  assert.match(report.markdown, /not legal advice/i);
 });

@@ -33,6 +33,7 @@ The browser UI now lets users keep escalation preparation local:
 - list locally saved plans in the tool panel
 - clear saved plans without sending anything to a server
 - copy or print a plain-text escalation checklist for the selected plan
+- copy a Markdown escalation readiness report with grouped evidence, blockers, and next actions
 
 The storage helpers use defensive JSON parsing and return an empty list if browser storage is unavailable or contains unexpected data. Reusable helpers are exported from `src/directory.js`:
 
@@ -40,6 +41,7 @@ The storage helpers use defensive JSON parsing and return an empty list if brows
 - `loadSavedActionPlans(storage)`
 - `clearSavedActionPlans(storage)`
 - `buildEscalationChecklist(plan)`
+- `buildEscalationReadinessReport(plan, options)`
 
 ## Current route coverage
 

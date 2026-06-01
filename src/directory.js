@@ -260,3 +260,69 @@ export function buildEscalationChecklist(plan) {
     `Official route: ${plan.officialUrl}`,
   ].join('\n');
 }
+
+function classifyEvidenceItem(item) {
+  const value = normalize(item);
+  if (/final|deadlock|response|letter|completion/.test(value)) return 'decision';
+  if (/date|timeline|log|history|chronology|reference/.test(value)) return 'timeline';
+  if (/photo|screenshot|record|invoice|statement|contract|ticket|booking|policy/.test(value)) return 'evidence';
+  if (/impact|harm|risk|medical|witness|injustice/.test(value)) return 'impact';
+  return 'supporting';
+}
+
+export function buildEscalationReadinessReport(plan, options = {}) {
+  const evidence = Array.isArray(plan.evidenceToGather) ? plan.evidenceToGather : [];
+  const groups = evidence.reduce((acc, item) => {
+    const category = classifyEvidenceItem(item);
+    acc[category] = acc[category] || [];
+    acc[category].push(item);
+    return acc;
+  }, {});
+  const missingEvidence = Array.isArray(options.missingEvidence)
+    ? options.missingEvidence.filter((item) => evidence.includes(item))
+    : [];
+  const gathered = Math.max(evidence.length - missingEvidence.length, 0);
+  const readinessScore = evidence.length === 0 ? 0 : Math.round((gathered / evidence.length) * 100);
+  const blockers = [
+    !plan.firstStep ? 'Confirm the organisation first-step complaint route.' : '',
+    missingEvidence.length ? `Gather ${missingEvidence.length} remaining evidence item${missingEvidence.length === 1 ? '' : 's'}.` : '',
+    !plan.officialUrl ? 'Find the official escalation route before submitting.' : '',
+  ].filter(Boolean);
+  const nextActions = [
+    plan.firstStep,
+    missingEvidence.length
+      ? `Prioritise: ${missingEvidence.slice(0, 3).join(', ')}.`
+      : 'Keep a copy of the complete evidence pack before escalating.',
+    plan.escalationPath,
+    `Use the official route: ${plan.officialUrl}`,
+  ].filter(Boolean);
+
+  return {
+    title: `${plan.routeName} readiness report`,
+    routeName: plan.routeName,
+    sector: plan.sector,
+    readinessScore,
+    status: readinessScore >= 80 ? 'ready' : readinessScore >= 50 ? 'nearly-ready' : 'prepare-first',
+    evidenceGroups: groups,
+    missingEvidence,
+    blockers,
+    nextActions,
+    markdown: [
+      `# ${plan.routeName} readiness report`,
+      '',
+      `Sector: ${plan.sector}`,
+      `Readiness: ${readinessScore}%`,
+      '',
+      '## Evidence checklist',
+      ...evidence.map((item) => `- [${missingEvidence.includes(item) ? ' ' : 'x'}] ${item}`),
+      '',
+      '## Blockers',
+      ...(blockers.length ? blockers.map((item) => `- ${item}`) : ['- No obvious blockers in this plan.']),
+      '',
+      '## Next actions',
+      ...nextActions.map((item) => `- ${item}`),
+      '',
+      'This is public-service information, not legal advice. Check deadlines and scheme rules before submitting.',
+    ].join('\n'),
+  };
+}

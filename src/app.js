@@ -1,6 +1,7 @@
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationReadinessReport,
   clearSavedActionPlans,
   findEscalationRoutes,
   loadSavedActionPlans,
@@ -26,6 +27,7 @@ function renderEvidence(items) {
 
 function renderActionPlan(plan) {
   const checklist = buildEscalationChecklist(plan);
+  const report = buildEscalationReadinessReport(plan);
   return `<article class="card action-plan">
     <p class="tag">${plan.sector}</p>
     <h2>Action plan: ${plan.routeName}</h2>
@@ -42,6 +44,12 @@ function renderActionPlan(plan) {
       <textarea id="checklist" readonly>${checklist}</textarea>
       <button id="copy-checklist" type="button" class="secondary">Copy checklist</button>
       <button id="print-checklist" type="button" class="secondary">Print checklist</button>
+    </div>
+    <div class="checklist-tools">
+      <h3>Readiness report: ${report.readinessScore}%</h3>
+      <p>Status: ${report.status.replace('-', ' ')}</p>
+      <textarea id="readiness-report" readonly>${report.markdown}</textarea>
+      <button id="copy-readiness-report" type="button" class="secondary">Copy readiness report</button>
     </div>
   </article>`;
 }
@@ -116,6 +124,13 @@ function update() {
   const printChecklist = document.querySelector('#print-checklist');
   if (printChecklist) {
     printChecklist.addEventListener('click', () => window.print());
+  }
+
+  const copyReadinessReport = document.querySelector('#copy-readiness-report');
+  if (copyReadinessReport) {
+    copyReadinessReport.addEventListener('click', async () => {
+      await copyText(buildEscalationReadinessReport(currentPlan).markdown);
+    });
   }
 }
 
