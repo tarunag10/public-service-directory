@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
   findEscalationRoutes,
@@ -134,4 +135,16 @@ test('builds escalation readiness report markdown with grouped evidence and bloc
   assert.match(report.markdown, /- \[ \] final response letter/);
   assert.match(report.markdown, /- \[x\] statements/);
   assert.match(report.markdown, /not legal advice/i);
+});
+
+test('builds escalation handoff packs with report, checklist, and contact log', () => {
+  const pack = buildEscalationHandoffPack(buildActionPlan('rail delay ticket'));
+
+  assert.equal(pack.title, 'Rail Ombudsman handoff pack');
+  assert.match(pack.markdown, /^# Rail Ombudsman handoff pack/m);
+  assert.match(pack.markdown, /## Readiness report/);
+  assert.match(pack.markdown, /## Checklist/);
+  assert.match(pack.markdown, /## Contact log/);
+  assert.match(pack.markdown, /Reference number/);
+  assert.match(pack.markdown, /Nothing was sent to a server/);
 });

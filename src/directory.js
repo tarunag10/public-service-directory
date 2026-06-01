@@ -326,3 +326,34 @@ export function buildEscalationReadinessReport(plan, options = {}) {
     ].join('\n'),
   };
 }
+
+export function buildEscalationHandoffPack(plan, options = {}) {
+  const checklist = buildEscalationChecklist(plan);
+  const report = buildEscalationReadinessReport(plan, options);
+
+  return {
+    title: `${plan.routeName} handoff pack`,
+    markdown: [
+      `# ${plan.routeName} handoff pack`,
+      '',
+      'Generated locally in the browser. Nothing was sent to a server.',
+      '',
+      '## Readiness report',
+      report.markdown,
+      '',
+      '## Checklist',
+      '```text',
+      checklist,
+      '```',
+      '',
+      '## Contact log',
+      '- [ ] Date contacted:',
+      '- [ ] Person or team:',
+      '- [ ] Reference number:',
+      '- [ ] Response promised by:',
+      '- [ ] Follow-up needed:',
+      '',
+      'Check official deadlines, scheme rules, and urgent advice routes before submitting.'
+    ].join('\n')
+  };
+}

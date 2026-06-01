@@ -1,6 +1,7 @@
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
   findEscalationRoutes,
@@ -50,6 +51,7 @@ function renderActionPlan(plan) {
       <p>Status: ${report.status.replace('-', ' ')}</p>
       <textarea id="readiness-report" readonly>${report.markdown}</textarea>
       <button id="copy-readiness-report" type="button" class="secondary">Copy readiness report</button>
+      <button id="copy-handoff-pack" type="button" class="secondary">Copy handoff pack</button>
     </div>
   </article>`;
 }
@@ -130,6 +132,13 @@ function update() {
   if (copyReadinessReport) {
     copyReadinessReport.addEventListener('click', async () => {
       await copyText(buildEscalationReadinessReport(currentPlan).markdown);
+    });
+  }
+
+  const copyHandoffPack = document.querySelector('#copy-handoff-pack');
+  if (copyHandoffPack) {
+    copyHandoffPack.addEventListener('click', async () => {
+      await copyText(buildEscalationHandoffPack(currentPlan).markdown);
     });
   }
 }
