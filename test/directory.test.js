@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildActionPlan, findEscalationRoutes, routes, sectors } from '../src/directory.js';
+import {
+  buildActionPlan,
+  buildEscalationChecklist,
+  clearSavedActionPlans,
+  findEscalationRoutes,
+  loadSavedActionPlans,
+  routes,
+  saveActionPlan,
+  sectors,
+} from '../src/directory.js';
 
 test('finds escalation routes by issue and sector', () => {
   const results = findEscalationRoutes('council housing repair');
@@ -57,4 +66,52 @@ test('returns a fallback action plan when no route matches', () => {
   assert.ok(plan.evidenceToGather.includes('complaint reference'));
   assert.match(plan.escalationPath, /sector filter/i);
   assert.equal(plan.officialUrl, 'https://www.gov.uk/complain');
+});
+
+test('saves and loads action plans from localStorage-safe JSON', () => {
+  const store = new Map();
+  const storage = {
+    getItem(key) {
+      return store.has(key) ? store.get(key) : null;
+    },
+    setItem(key, value) {
+      store.set(key, value);
+    },
+    removeItem(key) {
+      store.delete(key);
+    },
+  };
+  const plan = buildActionPlan('bank fraud refund');
+
+  const saved = saveActionPlan(plan, storage);
+
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].routeName, 'Financial Ombudsman Service');
+  assert.match(saved[0].savedAt, /^\d{4}-\d{2}-\d{2}T/);
+  assert.deepEqual(loadSavedActionPlans(storage), saved);
+
+  assert.deepEqual(clearSavedActionPlans(storage), []);
+  assert.deepEqual(loadSavedActionPlans(storage), []);
+});
+
+test('loads an empty saved-plan list when localStorage contains unsafe JSON', () => {
+  const storage = {
+    getItem() {
+      return '{"not":"an array"}';
+    },
+    setItem() {},
+    removeItem() {},
+  };
+
+  assert.deepEqual(loadSavedActionPlans(storage), []);
+});
+
+test('builds printable escalation checklist text for an action plan', () => {
+  const checklist = buildEscalationChecklist(buildActionPlan('rail delay ticket'));
+
+  assert.match(checklist, /^Escalation checklist: Rail Ombudsman/m);
+  assert.match(checklist, /First step: Contact the train company first/);
+  assert.match(checklist, /\[ \] ticket or booking reference/);
+  assert.match(checklist, /Escalation path: Escalate when the operator/);
+  assert.match(checklist, /Official route: https:\/\/www\.railombudsman\.org\//);
 });

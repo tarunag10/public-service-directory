@@ -101,6 +101,7 @@ export const routes = [
 ];
 
 const normalize = (value) => value.toLowerCase().trim();
+const savedPlansKey = 'open-access-uk:saved-action-plans';
 
 export const sectors = [...new Set(routes.map((route) => route.sector))].sort();
 
@@ -173,4 +174,89 @@ export function buildActionPlan(query = '', options = {}) {
     escalationPath: route.nextStep,
     officialUrl: route.officialUrl,
   };
+}
+
+function safeStorage(storage) {
+  if (storage) return storage;
+  if (typeof window !== 'undefined' && window.localStorage) return window.localStorage;
+  return null;
+}
+
+function normalizeSavedPlan(plan) {
+  if (!plan || typeof plan !== 'object') return null;
+  const evidenceToGather = Array.isArray(plan.evidenceToGather)
+    ? plan.evidenceToGather.filter((item) => typeof item === 'string' && item.trim())
+    : [];
+
+  if (!plan.routeName || !plan.firstStep || evidenceToGather.length === 0) return null;
+
+  return {
+    id: typeof plan.id === 'string' ? plan.id : `plan-${Date.now()}`,
+    savedAt: typeof plan.savedAt === 'string' ? plan.savedAt : new Date().toISOString(),
+    routeName: String(plan.routeName),
+    sector: String(plan.sector || 'General'),
+    firstStep: String(plan.firstStep),
+    evidenceToGather,
+    escalationPath: String(plan.escalationPath || ''),
+    officialUrl: String(plan.officialUrl || ''),
+  };
+}
+
+export function loadSavedActionPlans(storage) {
+  const target = safeStorage(storage);
+  if (!target) return [];
+
+  try {
+    const parsed = JSON.parse(target.getItem(savedPlansKey) || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeSavedPlan).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export function saveActionPlan(plan, storage) {
+  const target = safeStorage(storage);
+  const savedPlan = normalizeSavedPlan({
+    ...plan,
+    id: `plan-${Date.now()}`,
+    savedAt: new Date().toISOString(),
+  });
+  if (!target || !savedPlan) return loadSavedActionPlans(storage);
+
+  const plans = [savedPlan, ...loadSavedActionPlans(target)].slice(0, 12);
+  try {
+    target.setItem(savedPlansKey, JSON.stringify(plans));
+  } catch {
+    return loadSavedActionPlans(target);
+  }
+  return plans;
+}
+
+export function clearSavedActionPlans(storage) {
+  const target = safeStorage(storage);
+  if (!target) return [];
+
+  try {
+    target.removeItem(savedPlansKey);
+  } catch {
+    return [];
+  }
+  return [];
+}
+
+export function buildEscalationChecklist(plan) {
+  const evidence = Array.isArray(plan.evidenceToGather) ? plan.evidenceToGather : [];
+  return [
+    `Escalation checklist: ${plan.routeName}`,
+    `Sector: ${plan.sector}`,
+    '',
+    `First step: ${plan.firstStep}`,
+    '',
+    'Evidence to gather:',
+    ...evidence.map((item) => `[ ] ${item}`),
+    '',
+    `Escalation path: ${plan.escalationPath}`,
+    `Official route: ${plan.officialUrl}`,
+  ].join('\n');
 }

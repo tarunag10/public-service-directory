@@ -25,6 +25,22 @@ The directory now builds an action plan for the current query or selected sector
 
 The helper is exported as `buildActionPlan(query, options)` from `src/directory.js` so tests and future UI surfaces can reuse the same route selection logic.
 
+## Slice 2 saved-plan workflow
+
+The browser UI now lets users keep escalation preparation local:
+
+- save the selected action plan to browser storage
+- list locally saved plans in the tool panel
+- clear saved plans without sending anything to a server
+- copy or print a plain-text escalation checklist for the selected plan
+
+The storage helpers use defensive JSON parsing and return an empty list if browser storage is unavailable or contains unexpected data. Reusable helpers are exported from `src/directory.js`:
+
+- `saveActionPlan(plan, storage)`
+- `loadSavedActionPlans(storage)`
+- `clearSavedActionPlans(storage)`
+- `buildEscalationChecklist(plan)`
+
 ## Current route coverage
 
 - council complaints and Local Government and Social Care Ombudsman
