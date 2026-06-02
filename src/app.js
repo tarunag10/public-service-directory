@@ -1,6 +1,7 @@
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationContactLog,
   buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
@@ -54,6 +55,7 @@ function renderActionPlan(plan) {
       <p>Status: ${report.status.replace('-', ' ')}</p>
       <textarea id="readiness-report" readonly>${report.markdown}</textarea>
       <button id="copy-readiness-report" type="button" class="secondary">Copy readiness report</button>
+      <button id="copy-contact-log" type="button" class="secondary">Copy contact log</button>
       <button id="copy-handoff-pack" type="button" class="secondary">Copy handoff pack</button>
     </div>
   </article>`;
@@ -151,6 +153,13 @@ function update() {
   if (copyHandoffPack) {
     copyHandoffPack.addEventListener('click', async () => {
       await copyText(buildEscalationHandoffPack(currentPlan).markdown);
+    });
+  }
+
+  const copyContactLog = document.querySelector('#copy-contact-log');
+  if (copyContactLog) {
+    copyContactLog.addEventListener('click', async () => {
+      await copyText(buildEscalationContactLog(currentPlan).markdown);
     });
   }
 }

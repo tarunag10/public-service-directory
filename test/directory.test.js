@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildActionPlan,
   buildEscalationChecklist,
+  buildEscalationContactLog,
   buildEscalationHandoffPack,
   buildEscalationReadinessReport,
   clearSavedActionPlans,
@@ -151,6 +152,26 @@ test('builds escalation handoff packs with report, checklist, and contact log', 
   assert.match(pack.markdown, /Reference number/);
   assert.match(pack.markdown, /Current source notes/);
   assert.match(pack.markdown, /Nothing was sent to a server/);
+});
+
+test('builds contact logs for escalation follow-up records', () => {
+  const plan = buildActionPlan('housing damp repair');
+  const log = buildEscalationContactLog(plan, [
+    {
+      date: '2026-06-02',
+      contact: 'Repairs team',
+      reference: 'REP-123',
+      outcome: 'Asked for inspection date',
+      followUp: 'Chase in 5 working days'
+    }
+  ]);
+
+  assert.equal(log.title, 'Housing Ombudsman contact log');
+  assert.match(log.markdown, /^# Housing Ombudsman contact log/m);
+  assert.match(log.markdown, /REP-123/);
+  assert.match(log.markdown, /Chase in 5 working days/);
+  assert.match(log.markdown, /Keep sensitive account, health, or identity details out of public copies/);
+  assert.match(log.markdown, /final response, deadlock letter, or missed deadline/);
 });
 
 test('exposes current escalation guidance sources', () => {

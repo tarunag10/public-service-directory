@@ -365,6 +365,7 @@ export function buildEscalationReadinessReport(plan, options = {}) {
 export function buildEscalationHandoffPack(plan, options = {}) {
   const checklist = buildEscalationChecklist(plan);
   const report = buildEscalationReadinessReport(plan, options);
+  const contactLog = buildEscalationContactLog(plan, options.contactLogEntries);
 
   return {
     title: `${plan.routeName} handoff pack`,
@@ -382,16 +383,67 @@ export function buildEscalationHandoffPack(plan, options = {}) {
       '```',
       '',
       '## Contact log',
-      '- [ ] Date contacted:',
-      '- [ ] Person or team:',
-      '- [ ] Reference number:',
-      '- [ ] Response promised by:',
-      '- [ ] Follow-up needed:',
+      contactLog.markdown,
       '',
       '## Current source notes',
       ...currentGuidance.map((item) => `- ${item.title}: ${item.detail} Source: ${item.url}`),
       '',
       'Check official deadlines, scheme rules, and urgent advice routes before submitting.'
+    ].join('\n')
+  };
+}
+
+export function buildEscalationContactLog(plan, entries = []) {
+  const safeEntries = Array.isArray(entries)
+    ? entries
+        .filter((entry) => entry && typeof entry === 'object')
+        .map((entry) => ({
+          date: String(entry.date || ''),
+          contact: String(entry.contact || ''),
+          reference: String(entry.reference || ''),
+          outcome: String(entry.outcome || ''),
+          followUp: String(entry.followUp || '')
+        }))
+    : [];
+
+  const starterRows = safeEntries.length
+    ? safeEntries
+    : [
+        {
+          date: '',
+          contact: '',
+          reference: '',
+          outcome: '',
+          followUp: ''
+        }
+      ];
+
+  const rows = starterRows.map((entry, index) => [
+    `### Contact ${index + 1}`,
+    `- Date contacted: ${entry.date}`,
+    `- Person or team: ${entry.contact}`,
+    `- Reference number: ${entry.reference}`,
+    `- What happened: ${entry.outcome}`,
+    `- Follow-up needed: ${entry.followUp}`
+  ].join('\n'));
+
+  return {
+    title: `${plan.routeName} contact log`,
+    routeName: plan.routeName,
+    markdown: [
+      `# ${plan.routeName} contact log`,
+      '',
+      `Sector: ${plan.sector}`,
+      `Official route: ${plan.officialUrl}`,
+      '',
+      'Use this to keep a dated record before escalating. Keep sensitive account, health, or identity details out of public copies.',
+      '',
+      ...rows,
+      '',
+      'Suggested follow-up checks:',
+      '- [ ] Save copies of replies and screenshots.',
+      '- [ ] Note any final response, deadlock letter, or missed deadline.',
+      '- [ ] Check the official route before sending the next escalation.'
     ].join('\n')
   };
 }
