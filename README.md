@@ -14,9 +14,9 @@ The demo can be searched by:
 - evidence to keep
 - official route URL
 
-## First-slice capability
+## Action-plan workflow
 
-The directory now builds an action plan for the current query or selected sector. Each plan gives:
+The directory builds an action plan for the current query or selected sector. Each plan gives:
 
 - the first practical step
 - evidence to gather before escalating
@@ -25,9 +25,9 @@ The directory now builds an action plan for the current query or selected sector
 
 The helper is exported as `buildActionPlan(query, options)` from `src/directory.js` so tests and future UI surfaces can reuse the same route selection logic.
 
-## Slice 2 saved-plan workflow
+## Saved-plan workflow
 
-The browser UI now lets users keep escalation preparation local:
+The browser UI lets users keep escalation preparation local:
 
 - save the selected action plan to browser storage
 - list locally saved plans in the tool panel
