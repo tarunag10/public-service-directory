@@ -55,6 +55,28 @@
   background: var(--paper-2);
   padding: var(--space-5);
 }
+
+.escalation-timeline {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.escalation-timeline li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: start;
+}
+.step-dot {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
 @media (max-width: 860px) {
   #tool.grid {
     grid-template-columns: 1fr;

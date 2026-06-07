@@ -1,4 +1,6 @@
 import { initTheme } from './theme.js';
+import { createIcsEvent } from '../../shared/calendar/ics.mjs';
+import { addWorkingDays } from '../../shared/deadlines/index.mjs';
 import {
   buildActionPlan,
   buildEscalationChecklist,
@@ -59,6 +61,12 @@ function renderActionPlan(plan) {
       <button id="copy-contact-log" type="button" class="secondary">Copy contact log</button>
       <button id="copy-handoff-pack" type="button" class="secondary">Copy handoff pack</button>
     </div>
+    <ol class="escalation-timeline" aria-label="Escalation journey">
+      <li><span class="step-dot"></span>${plan.firstStep || 'Start the organisation complaint process'}</li>
+      <li><span class="step-dot"></span>${plan.escalationPath || 'Escalate to the relevant ombudsman or regulator'}</li>
+      <li><span class="step-dot"></span>Keep evidence and await the final decision</li>
+    </ol>
+    <button id="add-escalation-deadline" type="button" class="secondary">Add 8-week reminder to calendar</button>
   </article>`;
 }
 
@@ -161,6 +169,28 @@ function update() {
   if (copyContactLog) {
     copyContactLog.addEventListener('click', async () => {
       await copyText(buildEscalationContactLog(currentPlan).markdown);
+    });
+  }
+
+  const addDeadline = document.querySelector('#add-escalation-deadline');
+  if (addDeadline) {
+    addDeadline.addEventListener('click', () => {
+      const today = new Date();
+      const start = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+      const due = addWorkingDays(start, 40);
+      const ics = createIcsEvent({
+        title: `Escalation follow-up: ${currentPlan?.routeName || 'complaint'}`,
+        date: due,
+        description: 'Most ombudsman routes allow escalation around 8 weeks after the first complaint.',
+        uid: `oauk-escalation-${due}`
+      });
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'escalation-reminder.ics';
+      link.click();
+      URL.revokeObjectURL(url);
     });
   }
 }
